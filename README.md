@@ -1,131 +1,122 @@
-from src.simulator import CategoryGrowthSimulator
-from src.visualizations import GrowthVisualizer
-import pandas as pd
+# Category Growth Simulator
 
-# 1. Base Configuration
-base_config = {
-    'category_size': 15000000,
-    'penetration': 0.12,
-    'frequency': 4.2,
-    'distribution': 0.65,
-    'average_price': 150,
-    'premium_mix': 0.18,
-    'market_share': 0.18,
-    'households': 35000000,
-    'retailers': 50000,
-    'margin_rate': 0.45,
-    'variable_costs': 0.30
+**Marketing × Analytics × Strategy**
+
+A fully functional scenario modeling tool for Category Managers and Marketing Leaders to test growth levers, quantify commercial impact, and optimize investment decisions.
+
+> **Status: ✅ Complete Implementation**  
+> All stages (A-G) are fully implemented and ready for use.
+
+> This repository is a portfolio prototype. All company, brand and dataset examples are fictional and created for demonstration/testing.
+
+---
+
+## 🚀 What This Project Does
+
+The Category Growth Simulator helps marketing teams:
+
+1. **Test growth scenarios** before committing investment
+2. **Quantify commercial impact** of strategic choices
+3. **Compare trade-offs** across different growth levers
+4. **Build commercial confidence** through data-backed modeling
+5. **Challenge assumptions** about growth constraints
+6. **Optimize investment allocation** for maximum ROI
+7. **Visualize outcomes** through interactive dashboards
+
+---
+
+## The Problem
+
+Marketing leaders face constant pressure to grow, but:
+
+- **"What if we increase distribution?"** → Unknown volume impact
+- **"What if we premiumize?"** → Unknown margin trade-off
+- **"What if we launch a new SKU?"** → Unknown cannibalization
+- **"What if we invest in penetration?"** → Unknown ROI
+- **"How much should we invest?"** → Unknown optimal budget
+
+The Simulator takes the guesswork out of growth decisions by modeling the interconnected impact of commercial levers on revenue, volume, and margin.
+
+---
+
+## Strategic Philosophy
+
+The Simulator is built on five principles:
+
+1. **Model before you invest** — Test scenarios virtually before committing real resources
+2. **Connect levers to P&L** — Every growth lever must connect to revenue and margin
+3. **Understand trade-offs** — Growth in one area may come at the expense of another
+4. **Challenge assumptions** — Model should reveal, not hide, key assumptions
+5. **Build commercial confidence** — Results should be actionable, not academic
+
+---
+
+## Growth Lever Architecture
+
+The Simulator models 9 key growth levers:
+
+### 1. Penetration
+- **Definition:** % of target households buying the brand
+- **Impact:** New buyers = volume growth
+- **Levers:** Awareness, consideration, trial, distribution
+
+### 2. Frequency
+- **Definition:** Purchases per buyer per period
+- **Impact:** More repeat = sustainable volume
+- **Levers:** Occasion expansion, loyalty, pack size
+
+### 3. Distribution
+- **Definition:** % of outlets carrying the brand
+- **Impact:** Availability = trial opportunity
+- **Levers:** Channel expansion, shelf presence
+
+### 4. Pricing
+- **Definition:** Price point vs. competitors
+- **Impact:** Volume vs. margin trade-off
+- **Levers:** Price positioning, promotions
+
+### 5. Pack Mix
+- **Definition:** Distribution of pack sizes
+- **Impact:** Average transaction value
+- **Levers:** Pack architecture, size expansion
+
+### 6. Premium Mix
+- **Definition:** % of sales from premium SKUs
+- **Impact:** Margin expansion
+- **Levers:** Premiumization, portfolio mix
+
+### 7. Market Share
+- **Definition:** % of category sales
+- **Impact:** Competitive position
+- **Levers:** All of the above
+
+### 8. Occasion Expansion
+- **Definition:** Number of usage occasions
+- **Impact:** Frequency + penetration
+- **Levers:** New use cases, communication
+
+### 9. Geographic Expansion
+- **Definition:** New markets entered
+- **Impact:** Total addressable market growth
+- **Levers:** New regions, distribution build
+
+---
+
+## Simulator Architecture
+
+### Input Variables
+
+```python
+{
+    "category_size": 1000000,          # Total category volume
+    "penetration": 0.25,               # Household penetration
+    "frequency": 3.5,                  # Purchases per buyer
+    "distribution": 0.70,              # % outlets stocked
+    "average_price": 150,              # Weighted average price
+    "premium_mix": 0.15,               # % premium SKUs
+    "market_share": 0.18,              # Brand share of category
+    "households": 35000000,            # Target household base
+    "retailers": 50000,                # Total outlet universe
+    "margin_rate": 0.45,               # Gross margin %
+    "variable_costs": 0.30             # Variable costs as % of revenue
 }
-
-# 2. Define All 6 Scenarios
-scenarios = [
-    {
-        'name': 'Base Case',
-        'penetration_multiplier': 1.0,
-        'frequency_multiplier': 1.0,
-        'distribution_multiplier': 1.0,
-        'pricing_multiplier': 1.0,
-        'premium_mix_multiplier': 1.0,
-        'investment': 0
-    },
-    {
-        'name': 'Penetration Focus',
-        'penetration_multiplier': 1.15,
-        'frequency_multiplier': 1.0,
-        'distribution_multiplier': 1.0,
-        'pricing_multiplier': 1.0,
-        'premium_mix_multiplier': 1.0,
-        'investment': 30000000
-    },
-    {
-        'name': 'Distribution Focus',
-        'penetration_multiplier': 1.0,
-        'frequency_multiplier': 1.0,
-        'distribution_multiplier': 1.20,
-        'pricing_multiplier': 1.0,
-        'premium_mix_multiplier': 1.0,
-        'investment': 20000000
-    },
-    {
-        'name': 'Frequency Focus',
-        'penetration_multiplier': 1.0,
-        'frequency_multiplier': 1.10,
-        'distribution_multiplier': 1.0,
-        'pricing_multiplier': 1.0,
-        'premium_mix_multiplier': 1.0,
-        'investment': 15000000
-    },
-    {
-        'name': 'Premiumization',
-        'penetration_multiplier': 1.0,
-        'frequency_multiplier': 1.0,
-        'distribution_multiplier': 1.0,
-        'pricing_multiplier': 1.18,
-        'premium_mix_multiplier': 1.50,
-        'investment': 15000000
-    },
-    {
-        'name': 'Combined Growth',
-        'penetration_multiplier': 1.12,
-        'frequency_multiplier': 1.05,
-        'distribution_multiplier': 1.15,
-        'pricing_multiplier': 1.08,
-        'premium_mix_multiplier': 1.30,
-        'investment': 50000000
-    }
-]
-
-# 3. Initialize and Run
-sim = CategoryGrowthSimulator(base_config)
-results = sim.run_scenarios(scenarios)
-
-# 4. Compare Results
-comparison_df = sim.compare_scenarios(results)
-
-# 5. Calculate Impacts
-base_result = results[0]
-impacts = []
-for result in results[1:]:
-    impact = sim.calculate_impact(base_result, result)
-    impacts.append({
-        'Scenario': result.name,
-        'Volume Growth %': impact['volume_change_pct'],
-        'Revenue Growth %': impact['revenue_change_pct'],
-        'ROI': result.roi,
-        'Market Share Change pp': impact['market_share_change']
-    })
-
-impact_df = pd.DataFrame(impacts)
-
-# 6. Generate Visualizations
-viz = GrowthVisualizer()
-fig1 = viz.plot_roi_comparison(comparison_df)
-fig1.savefig('roi_comparison.png', dpi=300, bbox_inches='tight')
-
-fig2 = viz.plot_scenario_comparison(comparison_df, 
-                                   metrics=['Volume', 'Revenue', 'Net Profit'])
-fig2.savefig('scenario_comparison.png', dpi=300, bbox_inches='tight')
-
-# 7. Export Results
-sim.export_results(results, 'nectar_syrup_scenarios.xlsx')
-
-# 8. Print Summary
-print("\n" + "="*80)
-print("COMPARISON TABLE:")
-print(comparison_df.to_string(index=False))
-
-print("\n" + "="*80)
-print("IMPACT ANALYSIS:")
-print(impact_df.to_string(index=False))
-
-print("\n" + "="*80)
-print("STRATEGIC RECOMMENDATIONS:")
-
-best_roi = max(results[1:], key=lambda x: x.roi)
-print(f"\n🏆 BEST ROI: {best_roi.name} ({best_roi.roi:.1f}x ROI)")
-
-best_revenue = max(results[1:], key=lambda x: x.revenue)
-print(f"💰 HIGHEST REVENUE: {best_revenue.name} (₹{best_revenue.revenue:,.0f})")
-
-best_growth = max(results[1:], key=lambda x: x.market_share)
-print(f"📈 HIGHEST GROWTH: {best_growth.name} (+{((best_growth.market_share - base_result.market_share)*100):.1f}pp market share)")
